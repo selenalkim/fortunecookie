@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Fortune</title>
+    <style>
+        body {
+            background-color: #fff8e7;
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #c58f00;
+        }
+        #fortune {
+            font-size: 1.5em;
+            color: #333;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+        .cookie {
+            font-size: 3em;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="cookie">🥠</div>
+    <h1>Your Fortune:</h1>
+    <div id="fortune"></div>
+    <div class="footer">Tap your cookie again for a new message</div>
+
+    <script>
+        const fortunes = [
+            "A big change is coming, and you’re ready for it.",
+            "Today is a good day to take a risk.",
+            "Someone close is thinking of you warmly.",
+            "Your kindness will lead to a beautiful surprise.",
+            "Adventure is in your near future.",
+            "Let go of what you can’t control.",
+            "You are more powerful than you know.",
+            "You will laugh out loud today.",
+            "A dream you had recently holds a hidden message.",
+            "Luck is following you — quietly but surely."
+        ];
+        const randomIndex = Math.floor(Math.random() * fortunes.length);
+        document.getElementById("fortune").innerText = fortunes[randomIndex];
+    </script>
+</body>
+</html>
