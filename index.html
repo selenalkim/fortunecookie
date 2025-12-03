@@ -1,148 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Daily Fortune — EN/TR + Spotify</title>
-  <style>
-    :root { --bg: #fff8e7; --accent: #c58f00; --text: #333; --muted: #999; }
-    body {
-      background-color: var(--bg);
-      font-family: 'Georgia', serif;
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-      min-height: 100vh; margin: 0; padding: 20px; text-align: center;
-    }
-    h1 { color: var(--accent); margin: 8px 0; }
-    #fortune {
-      font-size: 1.3rem; color: var(--text); margin-top: 16px; max-width: 740px;
-      line-height: 1.6; opacity: 1; transition: opacity 240ms ease; white-space: pre-line;
-    }
-    .cookie { font-size: 3rem; cursor: pointer; user-select: none; transition: transform 120ms ease; }
-    .cookie:active { transform: scale(0.96); }
-    .footer { margin-top: 28px; font-size: 0.95rem; color: var(--muted); }
-    .btn, .lang { margin-top: 18px; border: none; background: var(--accent); color: white;
-      padding: 10px 14px; border-radius: 999px; font-size: 0.95rem; cursor: pointer; }
-    .btn:active, .lang:active { transform: translateY(1px); }
-    .langbar { display: flex; gap: 8px; margin-top: 10px; }
-    .lang.secondary { background: #e7d29b; color: #392e04; }
-    a { color: #0b64b3; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>Tap & Clay | Daily Fortune</title>
+    <meta name="description" content="A moment of mindfulness. A message for your day.">
+    
+    <meta property="og:title" content="My Cosmic Sign ✦">
+    <meta property="og:description" content="I just received my daily sign. Tap to reveal yours.">
+    <meta property="og:image" content="https://tapandclay.com/preview.jpg"> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+    
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        /* --- VARIABLES --- */
+        :root {
+            --bg-dark: #0F1016;
+            --gold: #D4AF37;
+            --text-main: #EAEAEA;
+            --purple-timer: #2D2B4A;
+        }
+
+        /* --- GLOBAL RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- STAR BACKGROUND --- */
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            animation: starMove 200s linear infinite;
+            opacity: 0.8;
+            z-index: -1;
+        }
+        @keyframes starMove { from { background-position: 0 0; } to { background-position: 550px 550px; } }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- LANGUAGE TOGGLE --- */
+        .language-toggle {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            z-index: 50;
+        }
+
+        .lang-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        /* --- HEADER --- */
+        header { text-align: center; margin-bottom: 3rem; }
+
+        h2.brand-name {
+            font-family: 'Cinzel', serif;
+            font-weight: 400;
+            letter-spacing: 4px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        h1.series-name {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            letter-spacing: 6px;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        p.subtitle {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            color: #aaa;
+            font-style: italic;
+            margin-top: 1rem;
+        }
+
+        /* --- STAGE 1: COOKIE --- */
+        .cookie-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .glow-circle {
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(108,92,231,0.5) 0%, rgba(15,16,22,0) 70%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulseGlow 4s infinite ease-in-out;
+            margin-bottom: 1.5rem;
+        }
+
+        .cookie-emoji {
+            font-size: 110px;
+            filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .tap-instruction {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border: 1px solid var(--gold);
+            padding: 12px 30px;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .prompt-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        /* --- STAGE 2: THE CARD --- */
+        .fortune-content {
+            display: none;
+            width: 100%;
+            animation: fadeInSlow 1s ease forwards;
+        }
+
+        .fortune-header {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .date-badge {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            display: block;
+            opacity: 0.9;
+        }
+
+        blockquote {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            line-height: 1.3;
+            color: white;
+            font-style: italic;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+        .card-footer {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* --- BUTTONS --- */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 200px;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        /* --- BOTTOM LINKS --- */
+        .bottom-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .shop-link, .insta-link {
+            text-align: center;
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0.8rem 1.5rem;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 240px; 
+            font-size: 0.9rem;
+        }
+        
+        .shop-link:hover, .insta-link:hover {
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+        
+        /* --- COUNTDOWN TIMER STYLES --- */
+        #timer-container {
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .timer-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 1.5rem;
+            color: #aaa;
+        }
+
+        .time-circle {
+            background-color: var(--purple-timer);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #EAEAEA;
+            font-size: 1.2rem;
+        }
+
+        .timer-footer {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            color: var(--text-main);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulseGlow { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+        @keyframes breakOpen {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2) rotate(5deg); opacity: 0.5; }
+            100% { transform: scale(1.5) rotate(-5deg); opacity: 0; }
+        }
+        @keyframes fadeInSlow { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
-  <div class="cookie" id="cookie" title="Click for a new fortune">🥠</div>
-  <h1 id="title">Your Fortune</h1>
-  <div id="fortune">Loading...</div>
-  <button class="btn" id="another">Give me another ✨</button>
-  <div class="langbar">
-    <button class="lang" id="lang-en">English</button>
-    <button class="lang secondary" id="lang-tr">Türkçe</button>
-  </div>
-  <div class="footer" id="tip">Tip: Click the cookie or the button to get a new message.</div>
 
-  <script>
-    const fortuneEl = document.getElementById('fortune');
-    const cookieEl = document.getElementById('cookie');
-    const btn = document.getElementById('another');
-    const tipEl = document.getElementById('tip');
-    const titleEl = document.getElementById('title');
-    const langEN = document.getElementById('lang-en');
-    const langTR = document.getElementById('lang-tr');
+    <div class="stars"></div>
 
-    const labels = {
-      en: { title: "Your Fortune", tip: "Tip: Click the cookie or the button to get a new message.",
-            number: "Today’s Lucky Number is: ", color: "Today’s Lucky Color is: ",
-            song: "Today’s Song for you is: ", another: "Give me another ✨" },
-      tr: { title: "Bugünün Falı", tip: "İpucu: Yeni bir mesaj için kurabiyeye ya da düğmeye tıkla.",
-            number: "Bugünün Şanslı Numarası: ", color: "Bugünün Şanslı Rengi: ",
-            song: "Bugün Senin Şarkın: ", another: "Bir tane daha ✨" }
-    };
+    <div class="language-toggle">
+        <button class="lang-btn" onclick="toggleLanguage()">
+            <span id="languageLabel">TR</span>
+        </button>
+    </div>
 
-    // Parse either EN or TR formatted line into parts
-    const reAny = new RegExp('^(.*) (?:Today’s Lucky Number is:|Bugünün Şanslı Numarası:) ([^,]+), (?:Today’s Lucky Color is:|Bugünün Şanslı Rengi:) ([^,]+), (?:Today’s Song for you is:|Bugün Senin Şarkın:) (.*)$', 'u');
+    <div class="container">
+        
+        <header>
+            <h2 class="brand-name">TAP & CLAY</h2>
+            <h1 class="series-name" id="seriesName">FORTUNE SERIES</h1>
+            <p class="subtitle" id="subtitle">A moment of mindfulness. A message for your day.</p>
+        </header>
 
-    let currentLang = 'en';
-    let dataEN = [];
-    let dataTR = [];
+        <div id="cookieStage" class="cookie-stage" onclick="crackCookie()">
+            <div class="prompt-text" id="promptText">Focus your intent...</div>
+            <div class="glow-circle">
+                <div class="cookie-emoji" id="cookieEmoji">🥠</div>
+            </div>
+            <p class="tap-instruction" id="tapText">Reveal My Fortune</p>
+        </div>
 
-    function setUI() {
-      const L = labels[currentLang];
-      titleEl.textContent = L.title;
-      tipEl.textContent = L.tip;
-      btn.textContent = L.another;
-      langEN.classList.toggle('secondary', currentLang !== 'en');
-      langTR.classList.toggle('secondary', currentLang !== 'tr');
-    }
+        <div id="fortuneStage" class="fortune-content">
+            
+            <h3 class="fortune-header" id="fortuneHeader">TODAY'S MESSAGE</h3>
 
-    function parseLine(s) {
-      const m = s.match(reAny);
-      if (!m) return { main: s, num: "", color: "", song: "" };
-      return { main: m[1].trim(), num: m[2].trim(), color: m[3].trim(), song: m[4].trim() };
-    }
+            <div class="card" id="captureCard">
+                <span id="dateBadge" class="date-badge">TODAY</span>
+                <blockquote id="fortuneMessage">"Loading..."</blockquote>
+                <div class="card-footer">✦ TAP & CLAY ✦</div>
+            </div>
 
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+            <div class="button-group">
+                <button class="btn" onclick="shareVisualCard()" id="shareBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 6.65685 16.3431 8 18 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 15C7.65685 15 9 13.6569 9 12C9 10.3431 7.65685 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C16.3431 16 15 17.3431 15 19C15 20.6569 16.3431 22 18 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8.59 13.51L15.42 17.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15.41 6.51001L8.59 10.49" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span id="shareBtnText">Share Fortune</span>
+                </button>
+            </div>
 
-    // Build a Spotify search URL like: https://open.spotify.com/search/track:"Happy" artist:"Pharrell Williams"
-    function spotifySearchUrl(songStr) {
-      // Try to split "Title — Artist" (em dash, en dash, or hyphen)
-      const parts = songStr.split(/[—–-]/);
-      let q;
-      if (parts.length >= 2) {
-        const title = parts[0].trim();
-        const artist = parts.slice(1).join(' ').trim();
-        q = 'track:"' + title + '" artist:"' + artist + '"';
-      } else {
-        q = songStr.trim();
-      }
-      return 'https://open.spotify.com/search/' + encodeURIComponent(q);
-    }
+            <div id="timer-container">
+                <p class="timer-label" id="timerLabel">Next fortune unlocks in:</p>
+                <div class="timer-box">
+                    <div class="time-circle"><span id="hours">00</span></div> :
+                    <div class="time-circle"><span id="minutes">00</span></div> :
+                    <div class="time-circle"><span id="seconds">00</span></div>
+                </div>
+                <p class="timer-footer" id="timerFooter">A new fortune awaits you tomorrow ✨</p>
+            </div>
 
-    function renderFourLines(p) {
-      const L = labels[currentLang];
-      const link = spotifySearchUrl(p.song);
-      // Use innerHTML to inject a link on the last line; safely escape other text.
-      fortuneEl.innerHTML = escapeHtml(p.main) + "\n"
-        + escapeHtml(L.number + p.num + ",") + "\n"
-        + escapeHtml(L.color + p.color + ",") + "\n"
-        + escapeHtml(L.song)
-        + '<a href="' + link + '" target="_blank" rel="noopener">'
-        + escapeHtml(p.song) + "</a>";
-    }
+            <div class="bottom-links">
+                <a href="https://www.instagram.com/tapandclay/reels/" target="_blank" class="insta-link" id="instaLink">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                    Follow on Instagram
+                </a>
 
-    function randomItem(list) { return list[Math.floor(Math.random() * list.length)]; }
+                <a href="https://tapandclay.com" class="shop-link" id="shopLink">
+                    Explore Tap & Clay
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
 
-    function showRandom() {
-      const list = currentLang === 'en' ? dataEN : dataTR;
-      const p = parseLine(randomItem(list));
-      fortuneEl.classList.add('fade-out');
-      setTimeout(() => {
-        renderFourLines(p);
-        fortuneEl.classList.remove('fade-out');
-      }, 140);
-    }
+    <script>
+        // --- DATA & CONFIG ---
+        const dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+        const todayStr = new Date().toLocaleDateString('en-US', dateOptions).toUpperCase();
+        let fortunes = [];
 
-    langEN.onclick = () => { currentLang = 'en'; setUI(); showRandom(); };
-    langTR.onclick = () => { currentLang = 'tr'; setUI(); showRandom(); };
-    btn.onclick = showRandom;
-    cookieEl.onclick = showRandom;
+        const translations = {
+            en: {
+                seriesName: "FORTUNE SERIES",
+                subtitle: "A moment of mindfulness. A message for your day.",
+                promptText: "Focus your intent...",
+                tapText: "Reveal My Fortune",
+                fortuneHeader: "TODAY'S MESSAGE",
+                shareBtnText: "Share Fortune",
+                loading: "Preparing Image...", 
+                shopLink: "Explore Tap & Clay",
+                instaLink: "Follow on Instagram",
+                shareTitle: "My Cosmic Sign ✦",
+                saveSuccess: "Image saved! Check your Photos/Gallery.",
+                timerLabel: "Next fortune unlocks in:",
+                timerFooter: "A new fortune awaits you tomorrow ✨"
+            },
+            tr: {
+                seriesName: "FAL SERİSİ",
+                subtitle: "Evrenin sana bir mesajı var.",
+                promptText: "Niyetine odaklan...",
+                tapText: "Falımı Göster",
+                fortuneHeader: "BUGÜNÜN MESAJI",
+                shareBtnText: "Falı Paylaş",
+                loading: "Görsel Hazırlanıyor...", 
+                shopLink: "Tap & Clay'i Keşfet",
+                instaLink: "Instagram'da Takip Et",
+                shareTitle: "Kozmik İşaretim ✦",
+                saveSuccess: "Görsel kaydedildi! Galerini kontrol et.",
+                timerLabel: "Yeni mesajınıza kalan süre:",
+                timerFooter: "Yarın yeni bir fal seni bekliyor ✨"
+            }
+        };
 
-    Promise.all([
-      fetch('fortunes_360_unique_lucky_ready.json', { cache: 'no-store' }).then(r => r.json()),
-      fetch('fortunes_360_tr.json', { cache: 'no-store' }).then(r => r.json())
-    ]).then(([en, tr]) => {
-      dataEN = en; dataTR = tr;
-      setUI(); showRandom();
-    }).catch(err => {
-      console.error(err);
-      fortuneEl.textContent = "Could not load datasets. Make sure both JSON files are present.";
-    });
-  </script>
+        let currentLang = 'en';
+        let currentFortune = null;
+        let countdownInterval;
+
+        // --- INIT ---
+        window.onload = function() {
+            loadData();
+            startCountdown();
+        };
+
+        // --- DATA FETCHING (Assumes fortunes.json has {id: x, message: {en: ..., tr: ...}} structure) ---
+        async function loadData() {
+            try {
+                const response = await fetch('fortunes.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                fortunes = data;
+                checkDailyStatus();
+            } catch (error) {
+                console.error("Error loading fortunes:", error);
+                document.getElementById('fortuneMessage').innerText = "Error loading data. Try refreshing.";
+                document.getElementById('cookieStage').style.display = 'none';
+                document.getElementById('fortuneStage').style.display = 'block';
+            }
+        }
+        
+        // --- CORE APP LOGIC (Omitted for brevity, assumed functional) ---
+
+        function checkDailyStatus() {
+            const today = new Date().toDateString();
+            const storedDate = localStorage.getItem('tc_mystic_date');
+            const storedIndex = localStorage.getItem('tc_mystic_index');
+
+            if (storedDate === today && storedIndex !== null && fortunes.length > 0) {
+                currentFortune = fortunes[parseInt(storedIndex)];
+                document.getElementById('cookieStage').style.display = 'none';
+                document.getElementById('fortuneStage').style.display = 'block';
+                document.getElementById('timer-container').style.display = 'flex';
+                document.getElementById('shareBtn').style.display = 'none';
+                updateText();
+            } else if (fortunes.length > 0) {
+                document.getElementById('cookieStage').style.display = 'flex';
+                document.getElementById('fortuneStage').style.display = 'none';
+                updateText();
+            }
+        }
+
+        function crackCookie() {
+            if (fortunes.length === 0) return;
+            
+            const cookie = document.getElementById('cookieEmoji');
+            const tapText = document.getElementById('tapText');
+            
+            cookie.style.animation = 'breakOpen 0.8s ease-out forwards';
+            tapText.style.opacity = '0';
+
+            const randomIndex = Math.floor(Math.random() * fortunes.length);
+            currentFortune = fortunes[randomIndex];
+            
+            const today = new Date().toDateString();
+            localStorage.setItem('tc_mystic_date', today);
+            localStorage.setItem('tc_mystic_index', randomIndex);
+
+            setTimeout(() => {
+                document.getElementById('cookieStage').style.display = 'none';
+                document.getElementById('fortuneStage').style.display = 'block';
+                document.getElementById('timer-container').style.display = 'flex';
+                updateText();
+            }, 800);
+        }
+
+        function updateText() {
+            const t = translations[currentLang];
+            document.getElementById('seriesName').innerText = t.seriesName;
+            document.getElementById('subtitle').innerText = t.subtitle;
+            document.getElementById('promptText').innerText = t.promptText;
+            document.getElementById('tapText').innerText = t.tapText;
+            document.getElementById('fortuneHeader').innerText = t.fortuneHeader;
+            document.getElementById('shareBtnText').innerText = t.shareBtnText;
+            document.getElementById('languageLabel').innerText = currentLang === 'en' ? 'TR' : 'EN';
+            
+            document.getElementById('shopLink').childNodes[0].nodeValue = t.shopLink + ' ';
+            document.getElementById('instaLink').childNodes[1].nodeValue = ' ' + t.instaLink;
+
+            document.getElementById('timerLabel').innerText = t.timerLabel;
+            document.getElementById('timerFooter').innerText = t.timerFooter;
+            document.getElementById('dateBadge').innerText = todayStr;
+
+            if (currentFortune) {
+                document.getElementById('fortuneMessage').innerText = `"${currentFortune.message[currentLang]}"`;
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'tr' : 'en';
+            updateText();
+        }
+        
+        function startCountdown() {
+            function updateTimer() {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setHours(24, 0, 0, 0); 
+                const diff = tomorrow - now;
+
+                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const m = Math.floor((diff / (1000 * 60)) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+                document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+                document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+
+                if (diff < 1000) {
+                    clearDailyLimit();
+                }
+            }
+            updateTimer();
+            countdownInterval = setInterval(updateTimer, 1000);
+        }
+
+
+        // --- VISUAL SHARE (HTML2CANVAS) - CORRECTED & ROBUST FUNCTION ---
+        async function shareVisualCard() {
+            const btn = document.getElementById('shareBtn');
+            const t = translations[currentLang];
+            const originalText = t.shareBtnText;
+
+            // 1. Show loading state immediately
+            document.getElementById('shareBtnText').innerText = t.loading;
+
+            try {
+                // 2. Capture Screenshot
+                const canvas = await html2canvas(document.getElementById('captureCard'), {
+                    backgroundColor: 'var(--bg-dark)', // Use the variable
+                    scale: 3, 
+                    useCORS: true
+                });
+
+                // 3. Convert to Image Blob
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], "tap-and-clay-fortune.png", { type: "image/png" });
+                    
+                    // 4. Try Native Sharing (Files are preferred for image-sharing apps like Instagram/WhatsApp)
+                    if (navigator.share && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Tap & Clay',
+                                text: t.shareTitle // Text that accompanies the image
+                            });
+                            // On successful share/dismissal, hide the button
+                            btn.style.display = 'none';
+                        } catch (err) {
+                            // Catches share cancellation or failure (e.g., user closing the menu)
+                            console.log('Share closed or failed:', err);
+                            document.getElementById('shareBtnText').innerText = originalText; // Reset text
+                        }
+                    } else {
+                        // 5. Fallback: Download Image (This ensures the user gets the image regardless)
+                        const link = document.createElement('a');
+                        link.download = 'my-fortune.png';
+                        link.href = canvas.toDataURL('image/png'); // Force PNG data URL
+                        link.click();
+                        alert(t.saveSuccess);
+                        btn.style.display = 'none'; // Hide button after successful download
+                    }
+                    
+                    // 6. Reset button text if it wasn't hidden (i.e., if share failed/was canceled)
+                    if (btn.style.display !== 'none') {
+                        document.getElementById('shareBtnText').innerText = originalText;
+                    }
+                }, 'image/png'); // Ensure PNG type for blob conversion
+
+            } catch (error) {
+                console.error("Error during visual card creation:", error);
+                document.getElementById('shareBtnText').innerText = originalText; // Reset text on error
+                alert("Sharing failed. Please try again or check if your phone supports this feature.");
+            }
+        }
+
+        // --- DEV UTILITY ---
+        function clearDailyLimit() {
+            localStorage.removeItem('tc_mystic_date');
+            localStorage.removeItem('tc_mystic_index');
+            location.reload();
+        }
+    </script>
 </body>
 </html>
